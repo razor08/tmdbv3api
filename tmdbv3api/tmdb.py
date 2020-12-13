@@ -3,7 +3,7 @@
 import logging
 import os
 import time
-
+import json
 import requests
 import requests.exceptions
 
@@ -153,23 +153,23 @@ class TMDb(object):
                 raise TMDbException(
                     "Rate limit reached. Try again in %d seconds." % sleep_time
                 )
+        
+         #json = req.json()
+        json2 = json.loads(req)
+        if "page" in json2:
+            os.environ["page"] = str(json2["page"])
 
-        json = req.json()
+        if "total_results" in json2:
+            os.environ["total_results"] = str(json2["total_results"])
 
-        if "page" in json:
-            os.environ["page"] = str(json["page"])
-
-        if "total_results" in json:
-            os.environ["total_results"] = str(json["total_results"])
-
-        if "total_pages" in json:
-            os.environ["total_pages"] = str(json["total_pages"])
+        if "total_pages" in json2:
+            os.environ["total_pages"] = str(json2["total_pages"])
 
         if self.debug:
-            logger.info(json)
+            logger.info(json2)
             logger.info(self.cached_request.cache_info())
 
-        if "errors" in json:
-            raise TMDbException(json["errors"])
+        if "errors" in json2:
+            raise TMDbException(json2["errors"])
 
-        return json
+        return json2
